@@ -39,6 +39,7 @@ configure_file(output : 'config.h', configuration : conf)
 
 if target_machine.system() == 'emscripten'
 	edid_decode_link_args += [
+		'--emit-tsd', 'edid-decode.d.ts',
 		'-sEXPORTED_FUNCTIONS=_parse_edid',
 		'-sEXPORTED_RUNTIME_METHODS=ccall,cwrap'
 	]

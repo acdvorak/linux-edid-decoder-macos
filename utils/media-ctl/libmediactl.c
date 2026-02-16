@@ -22,7 +22,9 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#if !defined(__APPLE__)
 #include <sys/sysmacros.h>
+#endif
 
 #include <ctype.h>
 #include <errno.h>

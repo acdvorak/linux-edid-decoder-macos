@@ -8,6 +8,7 @@
 #include <string>
 
 #include <fcntl.h>
+#include <linux/ioctl.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
 #include <unistd.h>

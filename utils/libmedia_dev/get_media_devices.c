@@ -20,7 +20,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
+#if !defined(__APPLE__)
 #include <sys/sysmacros.h>
+#endif
 #include <sys/stat.h>
 #include <string.h>
 #include <stdlib.h>

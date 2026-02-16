@@ -7,7 +7,9 @@
 
 #include <dirent.h>
 #include <sys/stat.h>
+#if !defined(__APPLE__)
 #include <sys/sysmacros.h>
+#endif
 
 #include <linux/media.h>
 
@@ -1050,7 +1052,7 @@ void common_control_event(int fd, const struct v4l2_event *ev)
 	}
 	if (ctrl->changes & V4L2_EVENT_CTRL_CH_DIMENSIONS) {
 		v4l2_query_ext_ctrl qctrl = {};
-	
+
 		qctrl.id = ev->id;
 		if (!query_ext_ctrl_ioctl(fd, qctrl)) {
 			ctrl_str2q[name2var(qctrl.name)] = qctrl;

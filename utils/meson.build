@@ -41,4 +41,6 @@ subdir('v4l2-tracer')
 
 # Compliance tools
 subdir('cec-compliance')
-subdir('v4l2-compliance')
+if host_machine.system() != 'darwin'
+    subdir('v4l2-compliance')
+endif

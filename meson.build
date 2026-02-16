@@ -70,6 +70,11 @@ v4l2_utils_incdir_arr = [
 
 if host_machine.system() == 'linux'
     v4l2_utils_incdir_arr += 'include'
+elif host_machine.system() == 'darwin'
+    v4l2_utils_incdir_arr += [
+        'contrib/freebsd/include',
+        'include',
+    ]
 elif host_machine.system() == 'freebsd'
     v4l2_utils_incdir_arr += 'contrib/freebsd/include'
 endif
@@ -124,7 +129,10 @@ dep_jsonc = dependency('json-c', required : get_option('v4l2-tracer'), version :
 dep_libdl = cc.find_library('dl')
 dep_libelf = cc.find_library('elf', required : get_option('bpf'))
 dep_libm = cc.find_library('m')
-dep_librt = cc.find_library('rt')
+dep_librt = cc.find_library('rt', required : false)
+if not dep_librt.found()
+    dep_librt = declare_dependency()
+endif
 dep_qt6 = dependency('qt6', modules: ['Core', 'Gui', 'Widgets', 'Core5Compat'], required: false)
 if dep_qt6.found()
   dep_qt_opengl = dependency('qt6', modules: ['OpenGL', 'OpenGLWidgets'],
@@ -192,6 +200,22 @@ endif
 
 if cc.has_function('argp_parse')
     dep_argp = dependency('', required : false)
+elif host_machine.system() == 'darwin'
+    dep_argp = dependency('', required : false)
+    foreach brew_prefix : ['/opt/homebrew', '/usr/local']
+        argp_lib = brew_prefix / 'lib' / 'libargp.a'
+        if fs.exists(argp_lib)
+            dep_argp = declare_dependency(
+                compile_args : ['-I' + brew_prefix / 'include'],
+                link_args : [argp_lib],
+            )
+            break
+        endif
+    endforeach
+
+    if not dep_argp.found()
+        dep_argp = cc.find_library('argp')
+    endif
 else
     dep_argp = cc.find_library('argp')
 endif
@@ -230,7 +254,24 @@ size_t iconv (iconv_t cd, char * *inbuf, size_t *inbytesleft, char * *outbuf, si
     endif
 endif
 
-dep_intl = dependency('intl')
+dep_intl = dependency('intl', required : false)
+if not dep_intl.found() and host_machine.system() == 'darwin'
+    foreach brew_gettext_prefix : ['/opt/homebrew/opt/gettext', '/usr/local/opt/gettext']
+        intl_header = brew_gettext_prefix / 'include' / 'libintl.h'
+        intl_lib = brew_gettext_prefix / 'lib' / 'libintl.dylib'
+        if fs.exists(intl_header) and fs.exists(intl_lib)
+            dep_intl = declare_dependency(
+                compile_args : ['-I' + brew_gettext_prefix / 'include'],
+                link_args : [intl_lib],
+            )
+            break
+        endif
+    endforeach
+endif
+
+if not dep_intl.found()
+    dep_intl = dependency('intl')
+endif
 
 have_gconv = cc.has_header('gconv.h', required : get_option('gconv'))
 

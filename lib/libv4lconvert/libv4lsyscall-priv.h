@@ -72,6 +72,18 @@
 #define	MMAP2_PAGE_SHIFT 0
 #endif
 
+#if defined(__APPLE__)
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#define	_IOC_NR(cmd) ((cmd) & 0xFF)
+#define	_IOC_TYPE(cmd) (((cmd) >> 8) & 0xFF)
+#define	_IOC_SIZE(cmd) (((cmd) >> 16) & 0x1FFF)
+#define	MMAP2_PAGE_SHIFT 0
+#endif
+
 #undef SYS_OPEN
 #undef SYS_CLOSE
 #undef SYS_IOCTL
@@ -85,10 +97,23 @@
 #ifdef SYS_openat
 #define SYS_OPEN(file, oflag, mode) \
 	syscall(SYS_openat, AT_FDCWD, (const char *)(file), (int)(oflag), (mode_t)(mode))
+#elif defined(__APPLE__)
+#define SYS_OPEN(file, oflag, mode) \
+	open((const char *)(file), (int)(oflag), (mode_t)(mode))
 #else
 #define SYS_OPEN(file, oflag, mode) \
 	syscall(SYS_open, (const char *)(file), (int)(oflag), (mode_t)(mode))
 #endif
+#if defined(__APPLE__)
+#define SYS_CLOSE(fd) \
+	close((int)(fd))
+#define SYS_IOCTL(fd, cmd, arg) \
+	ioctl((int)(fd), (unsigned long)(cmd), (void *)(arg))
+#define SYS_READ(fd, buf, len) \
+	read((int)(fd), (void *)(buf), (size_t)(len));
+#define SYS_WRITE(fd, buf, len) \
+	write((int)(fd), (const void *)(buf), (size_t)(len));
+#else
 #define SYS_CLOSE(fd) \
 	syscall(SYS_close, (int)(fd))
 #define SYS_IOCTL(fd, cmd, arg) \
@@ -97,6 +122,7 @@
 	syscall(SYS_read, (int)(fd), (void *)(buf), (size_t)(len));
 #define SYS_WRITE(fd, buf, len) \
 	syscall(SYS_write, (int)(fd), (const void *)(buf), (size_t)(len));
+#endif
 
 #if defined(__FreeBSD__)
 #define SYS_MMAP(addr, len, prot, flags, fd, off) \
@@ -111,14 +137,22 @@ register_t __syscall(quad_t, ...);
 #define SYS_MMAP(addr, len, prot, flags, fd, offset) \
 	__syscall((quad_t)SYS_mmap, (void *)(addr), (size_t)(len), \
 			(int)(prot), (int)(flags), (int)(fd), 0, (off_t)(offset))
+#elif defined(__APPLE__)
+#define SYS_MMAP(addr, len, prot, flags, fd, off) \
+	mmap((void *)(addr), (size_t)(len), (int)(prot), (int)(flags), (int)(fd), (off_t)(off))
 #else
 #define SYS_MMAP(addr, len, prot, flags, fd, off) \
 	syscall(SYS_mmap2, (void *)(addr), (size_t)(len), \
 			(int)(prot), (int)(flags), (int)(fd), (off_t)((off) >> MMAP2_PAGE_SHIFT))
 #endif
 
+#if defined(__APPLE__)
+#define SYS_MUNMAP(addr, len) \
+	munmap((void *)(addr), (size_t)(len))
+#else
 #define SYS_MUNMAP(addr, len) \
 	syscall(SYS_munmap, (void *)(addr), (size_t)(len))
+#endif
 
 #else
 

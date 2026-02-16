@@ -15,6 +15,14 @@
 
 #include <vector>
 
+#ifndef ENONET
+#ifdef ENOTCONN
+#define ENONET ENOTCONN
+#else
+#define ENONET 64
+#endif
+#endif
+
 #define TAG_AUDIO_RATE_CONTROL		1
 #define TAG_ARC_CONTROL 		(1 << 1)
 #define TAG_CAP_DISCOVERY_CONTROL 	(1 << 2)

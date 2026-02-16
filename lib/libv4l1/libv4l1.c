@@ -471,7 +471,7 @@ int v4l1_dup(int fd)
 	int index = v4l1_get_index(fd);
 
 	if (index == -1)
-		return syscall(SYS_dup, fd);
+		return dup(fd);
 
 	devices[index].open_count++;
 

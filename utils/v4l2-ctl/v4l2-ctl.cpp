@@ -25,7 +25,9 @@
 
 #include <dirent.h>
 #include <getopt.h>
+#if defined(__linux__)
 #include <sys/epoll.h>
+#endif
 
 #include <linux/media.h>
 
@@ -1593,6 +1595,7 @@ int main(int argc, char **argv)
 	}
 
 	if (options[OptEPollForEvent]) {
+#if defined(__linux__)
 		struct epoll_event epoll_ev;
 		int epollfd = -1;
 		__u32 seq = 0;
@@ -1618,6 +1621,28 @@ int main(int argc, char **argv)
 			seq = ev.sequence + 1;
 		}
 		close(epollfd);
+#else
+		fd_set fds;
+		__u32 seq = 0;
+
+		fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
+		while (true) {
+			struct v4l2_event ev;
+			int res;
+
+			FD_ZERO(&fds);
+			FD_SET(fd, &fds);
+			res = select(fd + 1, nullptr, nullptr, &fds, nullptr);
+			if (res <= 0)
+				break;
+			if (doioctl(fd, VIDIOC_DQEVENT, &ev))
+				break;
+			print_event(fd, &ev);
+			if (ev.sequence > seq)
+				printf("\tMissed %d events\n", ev.sequence - seq);
+			seq = ev.sequence + 1;
+		}
+#endif
 	}
 
 	if (options[OptSleep]) {

@@ -875,7 +875,7 @@ int v4l2_dup(int fd)
 	int index = v4l2_get_index(fd);
 
 	if (index == -1)
-		return syscall(SYS_dup, fd);
+		return dup(fd);
 
 	devices[index].open_count++;
 
@@ -1146,7 +1146,7 @@ int v4l2_ioctl(int fd, unsigned long int request, ...)
 	case VIDIOC_S_DV_TIMINGS:
 		is_capture_request = 1;
 		stream_needs_locking = 1;
-		break;		
+		break;
 	}
 
 	if (!is_capture_request) {

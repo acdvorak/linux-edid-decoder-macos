@@ -20,7 +20,7 @@
  */
 
 #include <sys/types.h>
-#ifndef __OpenBSD__
+#if !defined(__OpenBSD__) && !defined(__APPLE__)
 #include <sys/sysmacros.h>
 #endif
 #include <sys/mman.h>
@@ -62,7 +62,7 @@ static const struct v4lcontrol_flags_info v4lcontrol_flags[] = {
 		V4LCONTROL_HFLIPPED|V4LCONTROL_VFLIPPED | V4LCONTROL_WANTS_WB, 1500 },
 
 	/* Laptops (and all in one PC's) */
-	/* 0x0402, 0x5602 - add quirk to driver/media/video/gspca/m5602/m5602_s5k4aa.c */ 
+	/* 0x0402, 0x5602 - add quirk to driver/media/video/gspca/m5602/m5602_s5k4aa.c */
 	{ 0x0402, 0x5606, 0,
 		"CLEVO CO.                       ",
 		"M570TU                          ",
@@ -151,9 +151,9 @@ static const struct v4lcontrol_flags_info v4lcontrol_flags[] = {
 	{ 0x04f2, 0xb217, 0, "LENOVO", "42992QG",
 		V4LCONTROL_HFLIPPED | V4LCONTROL_VFLIPPED },
 	{ 0x04f2, 0xb27c, 0, "LENOVO", "12973MG",
-		V4LCONTROL_HFLIPPED | V4LCONTROL_VFLIPPED, 0, NULL, NULL, NULL, 
+		V4LCONTROL_HFLIPPED | V4LCONTROL_VFLIPPED, 0, NULL, NULL, NULL,
 		"ThinkPad Edge E325" },
-	{ 0x064e, 0xa111, 0, "Acer, Inc.", "Prespa1         ", 
+	{ 0x064e, 0xa111, 0, "Acer, Inc.", "Prespa1         ",
 		V4LCONTROL_HFLIPPED | V4LCONTROL_VFLIPPED, 0,
 		"Acer, inc.", "Aspire 5570     " },
 	/* 2 reports:
@@ -326,7 +326,7 @@ static const struct v4lcontrol_usb_id asus_camera_id[] = {
 
 static const struct v4lcontrol_upside_down_table upside_down[] = {
 	{ asus_board_vendor, asus_board_name, asus_camera_id },
-}; 
+};
 
 static void v4lcontrol_get_dmi_string(const char *sysfs_prefix, const char *string, char *buf, int size)
 {

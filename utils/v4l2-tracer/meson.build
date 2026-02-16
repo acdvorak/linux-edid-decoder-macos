@@ -2,6 +2,10 @@ if not dep_jsonc.found()
     subdir_done()
 endif
 
+if host_machine.system() == 'darwin'
+    subdir_done()
+endif
+
 # V4L2 tracer library
 
 libv4l2tracer_sources = files(

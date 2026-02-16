@@ -28,6 +28,10 @@
 #include "cec-ctl.h"
 #include "compiler.h"
 
+#ifndef ENONET
+#define ENONET ENOTCONN
+#endif
+
 static struct timespec start_monotonic;
 static struct timeval start_timeofday;
 static time_t valid_until_t;

@@ -12,7 +12,9 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#if !defined(__APPLE__)
 #include <sys/sysmacros.h>
+#endif
 #include <unistd.h>
 
 #include <linux/media.h>
