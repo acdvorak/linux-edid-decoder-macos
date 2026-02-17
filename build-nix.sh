@@ -75,6 +75,37 @@ EOF
 	fi
 }
 
+make_darwin_cross_file() {
+	local cross_file="$1"
+	local cpu_family="$2"
+	local cpu="$3"
+	local arch_flag="$4"
+
+	cat >"$cross_file" <<EOF
+[binaries]
+c = 'clang'
+cpp = 'clang++'
+ar = 'ar'
+strip = 'strip'
+pkgconfig = 'pkg-config'
+
+[host_machine]
+system = 'darwin'
+cpu_family = '${cpu_family}'
+cpu = '${cpu}'
+endian = 'little'
+
+[built-in options]
+c_args = ['-arch', '${arch_flag}']
+cpp_args = ['-arch', '${arch_flag}']
+c_link_args = ['-arch', '${arch_flag}']
+cpp_link_args = ['-arch', '${arch_flag}']
+
+[properties]
+needs_exe_wrapper = true
+EOF
+}
+
 build_native() {
 	local target_arch="$1"
 	local out_dir="build-${OS}-${target_arch}"
@@ -115,6 +146,29 @@ build_cross_linux() {
 	echo
 }
 
+build_cross_darwin() {
+	local target_arch="$1"
+	local cpu_family="$2"
+	local cpu="$3"
+	local arch_flag="$4"
+	local out_dir="build-${OS}-${target_arch}"
+	local cross_file="${out_dir}.cross"
+
+	make_darwin_cross_file "$cross_file" "$cpu_family" "$cpu" "$arch_flag"
+
+	echo "==> Configuring cross ${OS}/${target_arch} build"
+	meson setup "$out_dir" "${MESON_SETUP_ARGS[@]}" --cross-file "$cross_file"
+
+	echo "==> Building edid-decode (${target_arch})"
+	meson compile -C "$out_dir" edid-decode
+
+	echo
+	echo '-----------------------------------------------------------------------'
+	echo
+	printf '\033[1;32m%s\033[0m\n' "$out_dir/utils/edid-decode/edid-decode"
+	echo
+}
+
 if [[ "$OS" == "linux" ]]; then
 	if [[ "$HOST_ARCH" == "x86_64" ]]; then
 		build_native "x86_64"
@@ -139,13 +193,23 @@ if [[ "$OS" == "linux" ]]; then
 		exit 1
 	fi
 else
-	OUT_DIR="build-${OS}-${HOST_ARCH}"
-	meson setup "$OUT_DIR" "${MESON_SETUP_ARGS[@]}"
-	meson compile -C "$OUT_DIR" edid-decode
+	if [[ "$OS" == "darwin" ]]; then
+		if [[ "$HOST_ARCH" != "aarch64" ]]; then
+			echo "error: macOS builds are expected to run on ARM64 hosts; found: ${HOST_ARCH}" >&2
+			exit 1
+		fi
 
-	echo
-	echo '-----------------------------------------------------------------------'
-	echo
-	printf '\033[1;32m%s\033[0m\n' "$OUT_DIR/utils/edid-decode/edid-decode"
-	echo
+		build_native "aarch64"
+		build_cross_darwin "x86_64" "x86_64" "x86_64" "x86_64"
+	else
+		OUT_DIR="build-${OS}-${HOST_ARCH}"
+		meson setup "$OUT_DIR" "${MESON_SETUP_ARGS[@]}"
+		meson compile -C "$OUT_DIR" edid-decode
+
+		echo
+		echo '-----------------------------------------------------------------------'
+		echo
+		printf '\033[1;32m%s\033[0m\n' "$OUT_DIR/utils/edid-decode/edid-decode"
+		echo
+	fi
 fi

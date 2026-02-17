@@ -2,3 +2,4 @@
 patches/
 build/
 *.pc
+*.cross
