@@ -13,6 +13,23 @@ edid_decode_sources = [
 ]
 
 edid_decode_args = []
+edid_decode_link_args = []
+
+if get_option('edid-decode-static')
+	if host_machine.system() == 'linux'
+		edid_decode_link_args += [
+			'-static',
+			'-static-libgcc',
+			'-static-libstdc++',
+		]
+	elif host_machine.system() == 'windows'
+		edid_decode_link_args += [
+			'-static',
+			'-static-libgcc',
+			'-static-libstdc++',
+		]
+	endif
+endif
 
 if cc.has_header('linux/i2c-dev.h')
 	edid_decode_sources += ['ddc.cpp']
@@ -23,6 +40,7 @@ edid_decode = executable(
 	'edid-decode',
 	edid_decode_sources,
 	cpp_args: edid_decode_args,
+	link_args: edid_decode_link_args,
 	install: true,
 )
 

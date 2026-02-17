@@ -13,7 +13,20 @@ ARCH=$(uname -m)
 
 OUT_DIR="build-${OS}-${ARCH}"
 
-meson setup "$OUT_DIR" --wipe
+MESON_SETUP_ARGS=(
+	--wipe
+)
+
+if [[ "$OS" == "linux" ]]; then
+	MESON_SETUP_ARGS+=(
+		-Ddefault_library=static
+		-Dedid-decode-static=true
+	)
+elif [[ "$OS" == "darwin" ]]; then
+	echo "note: fully-static binaries are not supported by the macOS system toolchain; building default binary." >&2
+fi
+
+meson setup "$OUT_DIR" "${MESON_SETUP_ARGS[@]}"
 meson compile -C "$OUT_DIR" edid-decode
 
 echo
