@@ -568,16 +568,16 @@ void msg(bool is_warn, const char *fmt, ...);
 
 #ifdef _WIN32
 
-#define warn(fmt, ...) msg(true, fmt, __VA_ARGS__)
-#define warn_once(fmt, ...)				\
+#define warn(...) msg(true, __VA_ARGS__)
+#define warn_once(...)\
 	do {						\
 		static bool shown_warn;			\
 		if (!shown_warn) {			\
 			shown_warn = true;		\
-			msg(true, fmt, __VA_ARGS__);	\
+			msg(true, __VA_ARGS__);\
 		}					\
 	} while (0)
-#define fail(fmt, ...) msg(false, fmt, __VA_ARGS__)
+#define fail(...) msg(false, __VA_ARGS__)
 
 #else
 

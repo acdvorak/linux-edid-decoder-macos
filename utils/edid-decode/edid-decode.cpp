@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "../../include/v4l-getsubopt.h"
+
 #include "edid-decode.h"
 
 #define STR(x) #x
@@ -2234,7 +2236,7 @@ static int parse_cvt_subopt(char **subopt_str, double *value)
 		nullptr
 	};
 
-	opt = getsubopt(subopt_str, (char * const *)subopt_list, &opt_str);
+		opt = v4l_getsubopt(subopt_str, (char * const *)subopt_list, &opt_str);
 
 	if (opt_str == nullptr && opt != CVT_INTERLACED && opt != CVT_ALT &&
 	    opt != CVT_OVERSCAN && opt != CVT_EARLY_VSYNC) {
@@ -2370,7 +2372,7 @@ static int parse_gtf_subopt(char **subopt_str, double *value)
 		nullptr
 	};
 
-	opt = getsubopt(subopt_str, (char * const *)subopt_list, &opt_str);
+		opt = v4l_getsubopt(subopt_str, (char * const *)subopt_list, &opt_str);
 
 	if (opt == -1) {
 		fprintf(stderr, "Invalid suboptions specified.\n");
@@ -2505,7 +2507,7 @@ static int parse_ovt_subopt(char **subopt_str, unsigned *value)
 		nullptr
 	};
 
-	opt = getsubopt(subopt_str, (char* const*) subopt_list, &opt_str);
+		opt = v4l_getsubopt(subopt_str, (char* const*) subopt_list, &opt_str);
 
 	if (opt == -1) {
 		fprintf(stderr, "Invalid suboptions specified.\n");
@@ -2590,7 +2592,7 @@ static int parse_test_reliability_subopt(char **subopt_str, unsigned *value)
 		nullptr
 	};
 
-	opt = getsubopt(subopt_str, (char* const*) subopt_list, &opt_str);
+		opt = v4l_getsubopt(subopt_str, (char* const*) subopt_list, &opt_str);
 
 	if (opt == -1) {
 		fprintf(stderr, "Invalid suboptions specified.\n");

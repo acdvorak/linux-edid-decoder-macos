@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: ./install-win32-cross-toolchain.sh [--with-arm64]
+Usage: ./install-win32-cross-toolchain.sh [--no-arm64]
 
 Installs dependencies needed by build-edid-decode-win32.sh on Linux hosts.
 
@@ -13,15 +13,21 @@ Supported distributions:
   - Fedora (dnf)
 
 Options:
-  --with-arm64    Try to install Win32 ARM64 cross toolchain packages too.
+  --no-arm64      Skip Win32 ARM64 cross toolchain package checks/installs.
 EOF
 }
 
-WITH_ARM64=0
+HOST_ARCH="$(uname -m)"
+if [[ "$HOST_ARCH" == "aarch64" || "$HOST_ARCH" == "arm64" ]]; then
+  WITH_ARM64=1
+else
+  WITH_ARM64=0
+fi
+
 while (($#)); do
   case "$1" in
-    --with-arm64)
-      WITH_ARM64=1
+    --no-arm64)
+      WITH_ARM64=0
       ;;
     -h|--help)
       usage

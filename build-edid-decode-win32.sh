@@ -2,6 +2,42 @@
 
 set -euo pipefail
 
+usage() {
+  cat <<'EOF'
+Usage: ./build-edid-decode-win32.sh [--no-arm64]
+
+Cross-compile edid-decode for Windows on a Linux host.
+
+Options:
+  --no-arm64    Skip Win32 ARM64 build attempt.
+EOF
+}
+
+HOST_ARCH="$(uname -m)"
+if [[ "$HOST_ARCH" == "aarch64" || "$HOST_ARCH" == "arm64" ]]; then
+  WITH_ARM64=1
+else
+  WITH_ARM64=0
+fi
+
+while (($#)); do
+  case "$1" in
+    --no-arm64)
+      WITH_ARM64=0
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "error: unknown argument: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+  shift
+done
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
@@ -89,9 +125,12 @@ x86_prefix="$(find_toolchain_prefix x86_64-w64-mingw32)" || {
 build_arch "x86_64" "$x86_prefix" "x86_64" "x86_64"
 
 arm64_prefix=""
-if arm64_prefix="$(find_toolchain_prefix aarch64-w64-mingw32 aarch64-w64-mingw32ucrt)"; then
+if [[ "$WITH_ARM64" -eq 1 ]] && arm64_prefix="$(find_toolchain_prefix aarch64-w64-mingw32 aarch64-w64-mingw32ucrt)"; then
+  echo "==> ARM64 host/default detected; attempting Win32 ARM64 build"
   build_arch "aarch64" "$arm64_prefix" "aarch64" "aarch64"
-else
-  echo "note: no Win32 ARM64 MinGW toolchain found; skipping aarch64 build." >&2
+elif [[ "$WITH_ARM64" -eq 1 ]]; then
+  echo "note: ARM64 build is enabled, but no Win32 ARM64 MinGW toolchain was found; skipping." >&2
   echo "      looked for: aarch64-w64-mingw32-gcc, aarch64-w64-mingw32ucrt-gcc" >&2
+else
+  echo "==> ARM64 build disabled (non-ARM64 host default or --no-arm64)"
 fi

@@ -126,7 +126,11 @@ dep_glu = dependency('glu', required : false)
 
 dep_jsonc = dependency('json-c', required : get_option('v4l2-tracer'), version : '>=0.15')
 
-dep_libdl = cc.find_library('dl')
+if host_machine.system() == 'windows'
+    dep_libdl = declare_dependency()
+else
+    dep_libdl = cc.find_library('dl')
+endif
 dep_libelf = cc.find_library('elf', required : get_option('bpf'))
 dep_libm = cc.find_library('m')
 dep_librt = cc.find_library('rt', required : false)
@@ -200,6 +204,8 @@ endif
 
 if cc.has_function('argp_parse')
     dep_argp = dependency('', required : false)
+elif host_machine.system() == 'windows'
+    dep_argp = declare_dependency()
 elif host_machine.system() == 'darwin'
     dep_argp = dependency('', required : false)
     foreach brew_prefix : ['/opt/homebrew', '/usr/local']
@@ -269,7 +275,9 @@ if not dep_intl.found() and host_machine.system() == 'darwin'
     endforeach
 endif
 
-if not dep_intl.found()
+if host_machine.system() == 'windows'
+    dep_intl = declare_dependency()
+elif not dep_intl.found()
     dep_intl = dependency('intl')
 endif
 
