@@ -4,12 +4,13 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: ./build-edid-decode-win32.sh [--no-arm64]
+Usage: ./build-edid-decode-win32.sh [--no-arm64] [--shared-runtime]
 
 Cross-compile edid-decode for Windows on a Linux host.
 
 Options:
-  --no-arm64    Skip Win32 ARM64 build attempt.
+  --no-arm64       Skip Win32 ARM64 build attempt.
+  --shared-runtime Disable static-runtime linking (may require MinGW DLLs at runtime).
 EOF
 }
 
@@ -20,10 +21,15 @@ else
   WITH_ARM64=0
 fi
 
+STATIC_RUNTIME=1
+
 while (($#)); do
   case "$1" in
     --no-arm64)
       WITH_ARM64=0
+      ;;
+    --shared-runtime)
+      STATIC_RUNTIME=0
       ;;
     -h|--help)
       usage
@@ -82,6 +88,15 @@ cpu = '${cpu}'
 endian = 'little'
 EOF
 
+  if [[ "$STATIC_RUNTIME" -eq 1 ]]; then
+    cat >>"$cross_file" <<EOF
+
+[properties]
+c_link_args = ['-static', '-static-libgcc']
+cpp_link_args = ['-static', '-static-libgcc', '-static-libstdc++']
+EOF
+  fi
+
   if command -v "${prefix}-pkg-config" >/dev/null 2>&1; then
     printf "pkgconfig = '%s-pkg-config'\n" "$prefix" >>"$cross_file"
   fi
@@ -112,6 +127,10 @@ build_arch() {
   local exe_path="${builddir}/utils/edid-decode/edid-decode.exe"
   if [[ -f "$exe_path" ]]; then
     echo "built: ${exe_path}"
+    if command -v "${prefix}-objdump" >/dev/null 2>&1; then
+      echo "==> Imported DLLs (${arch_name})"
+      "${prefix}-objdump" -p "$exe_path" | grep 'DLL Name' || true
+    fi
   else
     echo "warning: build finished but expected binary not found at ${exe_path}" >&2
   fi
@@ -121,6 +140,12 @@ x86_prefix="$(find_toolchain_prefix x86_64-w64-mingw32)" || {
   echo "error: could not find x86_64 MinGW toolchain (expected x86_64-w64-mingw32-gcc)." >&2
   exit 1
 }
+
+if [[ "$STATIC_RUNTIME" -eq 1 ]]; then
+  echo "==> Static-runtime mode enabled (portable build preference)"
+else
+  echo "==> Shared-runtime mode enabled (DLL runtimes may be required)"
+fi
 
 build_arch "x86_64" "$x86_prefix" "x86_64" "x86_64"
 
