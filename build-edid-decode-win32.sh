@@ -98,7 +98,7 @@ build_arch() {
   local prefix="$2"
   local cpu_family="$3"
   local cpu="$4"
-  local builddir="builddir-win32-${arch_name}"
+  local builddir="build-win32-${arch_name}"
   local cross_file="${builddir}.cross"
 
   make_cross_file "$cross_file" "$prefix" "$cpu_family" "$cpu"
