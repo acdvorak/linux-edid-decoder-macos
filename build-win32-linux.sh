@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: ./build-edid-decode-win32.sh [--no-arm64] [--shared-runtime]
+Usage: ./build-win32-linux.sh [--no-arm64] [--shared-runtime]
 
 Cross-compile edid-decode for Windows on a Linux host.
 

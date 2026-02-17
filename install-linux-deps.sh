@@ -4,9 +4,9 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: ./install-linux-cross-toolchain.sh
+Usage: ./install-linux-deps.sh
 
-Install dependencies required by build-edid-decode-nix.sh so Linux hosts can
+Install dependencies required by build-nix.sh so Linux hosts can
 build both x86_64 and aarch64 targets (native + cross where needed).
 
 Supported distributions:
@@ -172,4 +172,4 @@ fi
 verify_tools
 
 echo
-echo "Done. Next step: run ./build-edid-decode-nix.sh"
+echo "Done. Next step: run ./build-nix.sh"

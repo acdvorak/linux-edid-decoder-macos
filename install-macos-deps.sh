@@ -6,7 +6,7 @@ usage() {
   cat <<'EOF'
 Usage: ./install-macos-toolchain.sh
 
-Installs dependencies required to run build-edid-decode-nix.sh on macOS.
+Installs dependencies required to run build-nix.sh on macOS.
 
 Required Homebrew formulas:
   - meson
@@ -100,4 +100,4 @@ verify_tools
 verify_brew_libs
 
 echo
-echo "Done. Next step: run ./build-edid-decode-nix.sh"
+echo "Done. Next step: run ./build-nix.sh"

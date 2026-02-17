@@ -4,9 +4,9 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: ./install-win32-cross-toolchain.sh [--no-arm64]
+Usage: ./install-win32-deps.sh [--no-arm64]
 
-Installs dependencies needed by build-edid-decode-win32.sh on Linux hosts.
+Installs dependencies needed by build-win32-linux.sh on Linux hosts.
 
 Supported distributions:
   - Debian / Ubuntu (apt)
@@ -159,4 +159,4 @@ else
 fi
 
 echo
-echo "Done. Next step: run ./build-edid-decode-win32.sh"
+echo "Done. Next step: run ./build-win32-linux.sh"
