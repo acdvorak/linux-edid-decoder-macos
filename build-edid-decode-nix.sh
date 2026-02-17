@@ -30,4 +30,7 @@ meson setup "$OUT_DIR" "${MESON_SETUP_ARGS[@]}"
 meson compile -C "$OUT_DIR" edid-decode
 
 echo
-echo "$OUT_DIR/utils/edid-decode/edid-decode"
+echo '-----------------------------------------------------------------------'
+echo
+printf '\033[1;32m%s\033[0m\n' "$OUT_DIR/utils/edid-decode/edid-decode"
+echo

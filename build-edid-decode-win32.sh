@@ -134,6 +134,14 @@ build_arch() {
   else
     echo "warning: build finished but expected binary not found at ${exe_path}" >&2
   fi
+
+  echo
+  echo '-----------------------------------------------------------------------'
+  echo
+  printf '\033[1;32m%s\033[0m\n' "$exe_path"
+  echo
+  echo '-----------------------------------------------------------------------'
+  echo
 }
 
 x86_prefix="$(find_toolchain_prefix x86_64-w64-mingw32)" || {
